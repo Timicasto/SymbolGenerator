@@ -54,4 +54,12 @@ writes the current working file to current working directory
 
 <br>
 
+copy:
+<br>
+syntax: copy
+<br>
+write command but the output location is your clipboard
+
+<br>
+
 exit: exit.

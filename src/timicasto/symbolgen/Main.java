@@ -1,5 +1,8 @@
 package timicasto.symbolgen;
 
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,13 +15,6 @@ public class Main {
 
 	static class FileMeta {
 		public String ref, val, fp, datasheet;
-
-		public FileMeta(String ref, String val, String fp, String datasheet) {
-			this.ref = ref;
-			this.val = val;
-			this.fp = fp;
-			this.datasheet = datasheet;
-		}
 
 		public FileMeta() {
 			this.ref = "";
@@ -54,12 +50,6 @@ public class Main {
 		public PinType type;
 		public String name, number;
 
-		public Pin(PinType type, String name, String number) {
-			this.type = type;
-			this.name = name;
-			this.number = number;
-		}
-
 		public Pin() {
 
 		}
@@ -71,10 +61,10 @@ public class Main {
 	static List<Pin> pins = new ArrayList<>();
 	static int method = -1;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) {
 
 		Scanner scanner = new Scanner(System.in);
-		String buf, command;
+		String buf;
 
 		if (method == -1) {
 			System.out.println("User Guide");
@@ -100,13 +90,51 @@ public class Main {
 					addPin(buf);
 				} else if (buf.startsWith("write")) {
 					write();
+				} else if (buf.startsWith("copy")) {
+					copy();
 				}
 			} catch (Throwable t) {
 				System.out.println(t.toString());
 				method = 1;
-				continue;
 			}
 		}
+	}
+
+	public static void copy() {
+		StringBuilder builder = new StringBuilder();
+		method = 0;
+		builder.append("(symbol ");
+		builder.append("\"").append(curr).append("\" (in_bom yes) (on_board yes)\n");
+
+		builder.append("  (property \"Reference\"" + " \"").append(currMeta.ref).append("\" ").append("(at 0 1.27 0)\n");
+		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
+
+		builder.append("  (property \"Value\"" + " \"").append(currMeta.val).append("\" ").append("(at 0 1.27 0)\n");
+		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
+
+		builder.append("  (property \"Footprint\"" + " \"").append(currMeta.fp).append("\" ").append("(at 0 1.27 0)\n");
+		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
+
+		builder.append("  (property \"Datasheet\"" + " \"").append(currMeta.datasheet).append("\" ").append("(at 0 1.27 0)\n");
+		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
+
+		builder.append("  (symbol \"").append(curr).append("_1_1\"\n");
+
+		int i = 0;
+		for (Pin pin : pins) {
+			builder.append("    (pin ").append(pin.type.toString()).append(" line (at 8.89 ").append(-14.605 + 1.905 * i).append(" 180) (length 2.54)\n");
+			builder.append("      (name \"").append(pin.name).append("\" (effects (font (size 1.27 1.27))))\n");
+			builder.append("      (number \"").append(pin.number).append("\" (effects (font (size 1.27 1.27))))\n");
+			builder.append("    )\n");
+			++i;
+		}
+
+		builder.append("  )\n");
+
+		builder.append(')');
+
+		Transferable trans = new StringSelection(builder.toString());
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
 	}
 
 	public static void write() throws IOException {
