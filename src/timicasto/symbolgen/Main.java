@@ -6,66 +6,15 @@ import java.awt.datatransfer.Transferable;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+	private static FileSerializer file;
 
-	static class FileMeta {
-		public String ref, val, fp, datasheet;
+	private static String prefix = "$_ ";
 
-		public FileMeta() {
-			this.ref = "";
-			this.val = "";
-			this.fp = "";
-			this.datasheet = "";
-		}
-	}
-
-	static class Pin {
-		enum PinType {
-			IN,
-			OUT,
-			BIDIRECTIONAL,
-			PASSIVE;
-
-			@Override
-			public String toString() {
-				switch (this) {
-					case IN:
-						return "input";
-					case OUT:
-						return "output";
-					case BIDIRECTIONAL:
-						return "bidirectional";
-					case PASSIVE:
-						return "passive";
-				}
-				return "";
-			}
-		}
-
-		public PinType type;
-		public String name, number;
-
-		public Pin() {
-
-		}
-
-		public Pin(PinType type, String name, String number) {
-			this.type = type;
-			this.name = name;
-			this.number = number;
-		}
-	}
-
-	static String curr = "";
-	static String prefix = "$_ ";
-	static FileMeta currMeta = new FileMeta();
-	static List<Pin> pins = new ArrayList<>();
-	static int method = -1;
+	private static int method = -1;
 
 	public static void main(String[] args) {
 
@@ -76,12 +25,14 @@ public class Main {
 			System.out.println("User Guide");
 			method = 0;
 		}
+
 		while (true) {
 			if (method == 0) {
 				System.out.print(prefix);
 			} else if (method == 1) {
 				System.out.print("E " + prefix);
 			}
+
 			buf = scanner.nextLine();
 			try {
 				if (buf.startsWith("newfile")) {
@@ -101,157 +52,97 @@ public class Main {
 				} else if (buf.startsWith("copy")) {
 					copy();
 				} else if (buf.startsWith("fuck")) {
-					fuck();
+					fuck(buf);
 				}
 			} catch (Throwable t) {
-				System.out.println(t.toString());
+				System.out.println(t);
 				method = 1;
 			}
 		}
 	}
 
-	public static void fuck() {
-		pins.remove(pins.size() - 1);
-	}
-
-	public static void addPins(String command) {
+	private static void fuck(String command) {
 		String[] args = command.split(" ");
-		int count = Integer.parseInt(args[2]);
-		String pinName = args[3];
-		Pin.PinType type;
-		switch (args[1].toCharArray()[0]) {
-			case 'I':
-				type = Pin.PinType.IN;
-				break;
-			case 'O':
-				type = Pin.PinType.OUT;
-				break;
-			case 'B':
-				type = Pin.PinType.BIDIRECTIONAL;
-				break;
-			case 'P':
-				type = Pin.PinType.PASSIVE;
-				break;
-			default:
-				throw new IllegalArgumentException("Invalid type: " + args[1].toCharArray()[0]);
+		if (args.length > 2) {
+			throw new IllegalArgumentException("Too many arguments.");
 		}
-		for (int i = 0; i < count; i++) {
-			pins.add(new Pin(type, pinName, args[4 + i]));
+
+		if (args.length == 2) {
+			int count = Integer.parseInt(args[1]);
+			fuck(count);
+		} else {
+			fuck();
 		}
 	}
 
-	public static void copy() {
-		StringBuilder builder = new StringBuilder();
-		method = 0;
-		builder.append("(symbol ");
-		builder.append("\"").append(curr).append("\" (in_bom yes) (on_board yes)\n");
-
-		builder.append("  (property \"Reference\"" + " \"").append(currMeta.ref).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (property \"Value\"" + " \"").append(currMeta.val).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (property \"Footprint\"" + " \"").append(currMeta.fp).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (property \"Datasheet\"" + " \"").append(currMeta.datasheet).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (symbol \"").append(curr).append("_1_1\"\n");
-
-		int i = 0;
-		for (Pin pin : pins) {
-			builder.append("    (pin ").append(pin.type.toString()).append(" line (at 8.89 ").append(-14.605 + 1.905 * i).append(" 180) (length 2.54)\n");
-			builder.append("      (name \"").append(pin.name).append("\" (effects (font (size 1.27 1.27))))\n");
-			builder.append("      (number \"").append(pin.number).append("\" (effects (font (size 1.27 1.27))))\n");
-			builder.append("    )\n");
-			++i;
-		}
-
-		builder.append("  )\n");
-
-		builder.append(')');
-
-		Transferable trans = new StringSelection(builder.toString());
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
+	private static void fuck() {
+		fuck(1);
 	}
 
-	public static void write() throws IOException {
-		StringBuilder builder = new StringBuilder();
-		method = 0;
-		builder.append("(symbol ");
-		builder.append("\"").append(curr).append("\" (in_bom yes) (on_board yes)\n");
-
-		builder.append("  (property \"Reference\"" + " \"").append(currMeta.ref).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (property \"Value\"" + " \"").append(currMeta.val).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (property \"Footprint\"" + " \"").append(currMeta.fp).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (property \"Datasheet\"" + " \"").append(currMeta.datasheet).append("\" ").append("(at 0 1.27 0)\n");
-		builder.append("    (effects (font (size 1.27 1.27)))\n  )\n");
-
-		builder.append("  (symbol \"").append(curr).append("_1_1\"\n");
-
-		int i = 0;
-		for (Pin pin : pins) {
-			builder.append("    (pin ").append(pin.type.toString()).append(" line (at 8.89 ").append(-14.605 + 1.905 * i).append(" 180) (length 2.54)\n");
-			builder.append("      (name \"").append(pin.name).append("\" (effects (font (size 1.27 1.27))))\n");
-			builder.append("      (number \"").append(pin.number).append("\" (effects (font (size 1.27 1.27))))\n");
-			builder.append("    )\n");
-			++i;
-		}
-
-		builder.append("  )\n");
-
-		builder.append(')');
-
-		BufferedWriter writer = new BufferedWriter(new FileWriter(curr));
-		writer.write(builder.toString());
-		writer.close();
+	private static void fuck(int count) {
+		file.removePin(file.getPinSize() - count, count);
 	}
 
-	public static void addPin(String buf) {
+	private static void addPin(String buf) {
 		String[] parsed = buf.split(" ");
 		if (parsed[1].length() != 1) {
 			throw new IllegalArgumentException("Invalid Type: Corrupted length");
 		}
-		Pin pin = new Pin();
+		Pin.Type type = Pin.Type.of(parsed[1].toCharArray()[0]);
 		method = 0;
-		switch (parsed[1].toCharArray()[0]) {
-			case 'I':
-				pin.type = Pin.PinType.IN;
-				break;
-			case 'O':
-				pin.type = Pin.PinType.OUT;
-				break;
-			case 'B':
-				pin.type = Pin.PinType.BIDIRECTIONAL;
-				break;
-			case 'P':
-				pin.type = Pin.PinType.PASSIVE;
-				break;
-		}
-		pin.name = parsed[2];
-		pin.number = parsed[3];
-		pins.add(pin);
+		String name = parsed[2];
+		String number = parsed[3];
+
+		file.addPin(type, name, number);
 	}
 
-	public static void cat(String buf) {
+	private static void addPins(String command) {
+		String[] args = command.split(" ");
+		int count = Integer.parseInt(args[2]);
+		String pinName = args[3];
+		Pin.Type type = Pin.Type.of(args[1].toCharArray()[0]);
+		for (int i = 0; i < count; i++) {
+			file.addPin(type, pinName, args[4 + i]);
+		}
+	}
+
+	private static void copy() {
+		method = 0;
+
+		if (file == null) {
+			throw new NullPointerException("Please create new file first.");
+		}
+
+		String str = file.serialize();
+		Transferable trans = new StringSelection(str);
+		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(trans, null);
+	}
+
+	private static void write() throws IOException {
+		method = 0;
+
+		if (file == null) {
+			throw new NullPointerException("Please create new file first.");
+		}
+
+		String str = file.serialize();
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file.getFilename()));
+		writer.write(str);
+		writer.close();
+	}
+
+	private static void cat(String buf) {
 		String val = buf.split(" ")[1];
 		method = 0;
 		if (val.equals("filename")) {
-			System.out.println(curr + "\n");
+			System.out.println(file.getFilename());
 		} else if (val.equals("meta")) {
-			System.out.println(currMeta.ref + " " + currMeta.val + " " + currMeta.fp + " " + currMeta.datasheet);
+			FileMeta meta = file.getFileMeta();
+			System.out.println(meta.ref + " " + meta.val + " " + meta.fp + " " + meta.datasheet);
 		}
 	}
 
-	public static void createMeta(String buf) {
+	private static void createMeta(String buf) {
 		String[] parsed = buf.split(" ");
 		char[] options = parsed[1].toCharArray();
 		int cx = 2;
@@ -260,37 +151,37 @@ public class Main {
 		for (char option : options) {
 			switch (option) {
 				case 'r':
-					currMeta.ref = parsed[cx];
+					file.getFileMeta().ref = parsed[cx];
 					++cx;
 					break;
 				case 'v':
-					currMeta.val = parsed[cx];
+					file.getFileMeta().val = parsed[cx];
 					++cx;
 					break;
 				case 'f':
-					currMeta.fp = parsed[cx];
+					file.getFileMeta().fp = parsed[cx];
 					++cx;
 					break;
 				case 'd':
-					currMeta.datasheet = parsed[cx];
+					file.getFileMeta().datasheet = parsed[cx];
 					++cx;
 					break;
 			}
 		}
 	}
 
-	public static void newFile(String buf) {
+	private static void newFile(String buf) {
 		String[] fileName = buf.split(" ");
 		method = 0;
 		if (fileName[1].isEmpty()) {
 			throw new IllegalArgumentException("newfile: Filename Expected.");
 		}
-		curr = fileName[1];
-		prefix = curr + " " + prefix;
+		file = new FileSerializer(fileName[1]);
+		prefix = file.getFilename() + " " + prefix;
 		System.out.println("Changing current file to " + fileName[1]);
 	}
 
-	static void exit() {
+	private static void exit() {
 		System.exit(0);
 	}
 }
