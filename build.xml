@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project default="build" name="SymbolGen">
+  <property name="src" value="src"/>
+  <property name="classes" value="classes"/>
+  <property name="dest" value="dest"/>
+
+  <target name="compile">
+    <delete dir="out/${classes}"/>
+    <mkdir dir="out/${classes}"/>
+    <javac srcdir="${src}" destdir="out/${classes}" encoding="utf-8"/>
+  </target>
+
+  <target name="run" depends="compile">
+    <java classname="timicasto.symbolgen.Main" fork="yes">
+      <classpath path="out/${classes}"/>
+    </java>
+  </target>
+
+  <target name="build" depends="compile">
+    <delete dir="out/${dest}"/>
+    <mkdir dir="out/${dest}"/>
+    <jar destfile="out/${dest}/SymbolGen.jar" basedir="out/${classes}">
+      <manifest>
+        <attribute name="Main-Class" value="timicasto.symbolgen.Main"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean">
+    <delete dir="out/${classes}"/>
+    <delete dir="out/${dest}"/>
+  </target>
+</project>
