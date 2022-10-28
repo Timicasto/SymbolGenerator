@@ -63,3 +63,19 @@ write command but the output location is your clipboard
 <br>
 
 exit: exit.
+
+<br>
+
+fuck:
+<br>
+revert the previous adding change.
+
+<br>
+
+addpins:
+<br>
+syntax: addpins [I/O/B/P) [int/count) [string/name) [string.../pinid...)
+<br>example:<br>
+```addpins I 3 VDD A1 B5 D2```
+```addpins O 2 LVDS_CLKA 57 58```
+```addpins B 10 DDR_VDD C3 C5 C8 D2 J7 K2 A3 B2 E5 F6```
