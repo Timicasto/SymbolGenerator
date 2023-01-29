@@ -79,3 +79,30 @@ syntax: addpins [I/O/B/P) [int/count) [string/name) [string.../pinid...)
 ```addpins I 3 VDD A1 B5 D2```
 ```addpins O 2 LVDS_CLKA 57 58```
 ```addpins B 10 DDR_VDD C3 C5 C8 D2 J7 K2 A3 B2 E5 F6```
+
+<br>
+
+faddpinto:
+<br>
+syntax: faddpinto [I/O/B/P) [string/name) [int/start) [int/end) [string.../pinid...)
+<br>example:<br>
+```faddpinto B DQ 0 7 0 1 2 3 4 5 6 7: generates pin 0 ~ 7 with name DQ0 DQ1 DQ2 DQ3... DQ7```
+
+<br>
+
+diffaddto:
+<br>
+syntax: diffaddto [I/O/B/P) [string/name) [int/start) [int/end) [string.../pinid...)
+<br>example:<br>
+```diffaddto B CLK 0 1 0 1 2 3: generates pin 0 1 2 3 with name CLK0P CLK0N CLK1P CLK1N```
+
+<br>
+
+diffadd:
+<br>
+syntax: diffadd [I/O/B/P) [string/name) [string/pinidP) [string/pinidN)
+<br>example:<br>
+```diffadd B CLK 0 1: generates pin 0 1 with name CLKP CLKN```
+
+# copy the file content and paste it as a symbol in your KiCAD symbol editor
+

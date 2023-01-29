@@ -102,6 +102,12 @@ public class Main {
 					copy();
 				} else if (buf.startsWith("fuck")) {
 					fuck();
+				} else if (buf.startsWith("faddpinto")) {
+					addpinto(buf);
+				} else if (buf.startsWith("diffaddto")) {
+					diffaddto(buf);
+				} else if (buf.startsWith("diffadd")) {
+					diffadd(buf);
 				}
 			} catch (Throwable t) {
 				System.out.println(t.toString());
@@ -137,6 +143,83 @@ public class Main {
 		}
 		for (int i = 0; i < count; i++) {
 			pins.add(new Pin(type, pinName, args[4 + i]));
+		}
+	}
+
+	public static void diffadd(String command) {
+		String[] args = command.split(" ");
+		String pinName = args[2];
+		Pin.PinType type;
+		switch (args[1].toCharArray()[0]) {
+			case 'I':
+				type = Pin.PinType.IN;
+				break;
+			case 'O':
+				type = Pin.PinType.OUT;
+				break;
+			case 'B':
+				type = Pin.PinType.BIDIRECTIONAL;
+				break;
+			case 'P':
+				type = Pin.PinType.PASSIVE;
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid type: " + args[1].toCharArray()[0]);
+		}
+		pins.add(new Pin(type, pinName + "P", args[3]));
+		pins.add(new Pin(type, pinName + "N", args[4]));
+	}
+
+	public static void addpinto(String command) {
+		String[] args = command.split(" ");
+		String pinName = args[2];
+		Pin.PinType type;
+		switch (args[1].toCharArray()[0]) {
+			case 'I':
+				type = Pin.PinType.IN;
+				break;
+			case 'O':
+				type = Pin.PinType.OUT;
+				break;
+			case 'B':
+				type = Pin.PinType.BIDIRECTIONAL;
+				break;
+			case 'P':
+				type = Pin.PinType.PASSIVE;
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid type: " + args[1].toCharArray()[0]);
+		}
+		int counter = 0;
+		for (int i = Integer.parseInt(args[3]); i <= Integer.parseInt(args[4]); i++) {
+			pins.add(new Pin(type, pinName + Integer.toString(i), args[5 + counter++]));
+		}
+	}
+
+	public static void diffaddto(String command) {
+		String[] args = command.split(" ");
+		String pinName = args[2];
+		Pin.PinType type;
+		switch (args[1].toCharArray()[0]) {
+			case 'I':
+				type = Pin.PinType.IN;
+				break;
+			case 'O':
+				type = Pin.PinType.OUT;
+				break;
+			case 'B':
+				type = Pin.PinType.BIDIRECTIONAL;
+				break;
+			case 'P':
+				type = Pin.PinType.PASSIVE;
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid type: " + args[1].toCharArray()[0]);
+		}
+		int counter = 0;
+		for (int i = Integer.parseInt(args[3]); i <= Integer.parseInt(args[4]); i++) {
+			pins.add(new Pin(type, pinName + Integer.toString(i) + "P", args[5 + counter++]));
+			pins.add(new Pin(type, pinName + Integer.toString(i) + "N", args[5 + counter++]));
 		}
 	}
 
@@ -199,7 +282,7 @@ public class Main {
 
 		int i = 0;
 		for (Pin pin : pins) {
-			builder.append("    (pin ").append(pin.type.toString()).append(" line (at 8.89 ").append(-14.605 + 1.905 * i).append(" 180) (length 2.54)\n");
+			builder.append("    (pin ").append(pin.type.toString()).append(" line (at 8.89 ").append(-14.605 + 2.54 * i).append(" 180) (length 2.54)\n");
 			builder.append("      (name \"").append(pin.name).append("\" (effects (font (size 1.27 1.27))))\n");
 			builder.append("      (number \"").append(pin.number).append("\" (effects (font (size 1.27 1.27))))\n");
 			builder.append("    )\n");
